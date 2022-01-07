@@ -5,7 +5,6 @@ import numpy as np
 from bokeh.io import curdoc
 from bokeh.plotting import figure
 from bokeh.models import ColumnDataSource, LinearColorMapper, ColorBar, BasicTicker
-from bokeh.palettes import Spectral11
 from bokeh.models import Slider, Select, Column, Row
 from bokeh.transform import transform
 
@@ -74,7 +73,25 @@ df_week = pd.DataFrame(matriks_date_hour.stack(), columns=["frequency"]).reset_i
 source = ColumnDataSource(df_week)
 
 # Membuat mapper
-mapper = LinearColorMapper(palette=Spectral11, low=df_week.frequency.min(), high=df_week.frequency.max())
+colors = [
+    "#ffffd3",
+    "#fbf6bf",
+    "#f8ecab",
+    "#f6e298",
+    "#f5d785",
+    "#f4cc72",
+    "#f5c060",
+    "#f5b44f",
+    "#f6a73f",
+    "#f7992f",
+    "#f98b1f",
+    "#fa7b10",
+    "#fc6a01",
+    "#fd5500",
+    "#fe3b00",
+    "#ff0000"
+]
+mapper = LinearColorMapper(palette=colors, low=df_week.frequency.min(), high=df_week.frequency.max())
 
 # Membuat figure
 p = figure(
@@ -105,7 +122,7 @@ p.rect(
 # Membuat color bar
 color_bar = ColorBar(
     color_mapper=mapper,
-    ticker=BasicTicker(desired_num_ticks=len(Spectral11))
+    ticker=BasicTicker(desired_num_ticks=16)
 )
 p.add_layout(color_bar, 'right')  # memposisikan color bar di sebelah kanan
 
@@ -218,7 +235,7 @@ def update_plot(attr, old, new):
     # Membuat color bar
     color_bar = ColorBar(
         color_mapper=mapper,
-        ticker=BasicTicker(desired_num_ticks=len(Spectral11))
+        ticker=BasicTicker(desired_num_ticks=16)
     )
     p_new.add_layout(color_bar, 'right')  # Memposisikan color bar di kanan plot
 
