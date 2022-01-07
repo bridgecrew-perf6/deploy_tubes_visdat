@@ -35,22 +35,11 @@ df_week = df_week.loc[df["date"] <= 9]
 df_week["date"] = df_week["date"].astype("str")
 df_week["hour"] = df_week["hour"].astype("int")
 
-# Mengambil tanggal dan jam transaksi
-dates = df_week.date.unique()
-hours = df_week.hour.unique().tolist()
+# tanggal transaksi
+dates = [str(date) for date in range(3, 10)]
 
-hours.sort()  # Mengurutkan jam
-
-# Menambah tanggal 3 dan 8
-dates_in_int = []
-for date in dates:
-    dates_in_int.append(int(date))
-dates_in_int.insert(0, '3')
-dates_in_int.insert(5, '8')
-dates_in_int = [date for date in dates_in_int]
-dates = []
-for date in dates_in_int:
-    dates.append(str(date))
+# Jam transaksi
+hours = [hour for hour in range(0, 24)]
 
 # Membuat data untuk matriks_date_hour
 d = {}
@@ -136,7 +125,7 @@ def update_plot(attr, old, new):
     new_df = df.copy(deep=True)  # copy dataframe
 
     first_date = datetime.date(2010, 12, 27) + datetime.timedelta(days=7*no_week)  # tanggal pertama di week yang sedang dipilih
-    last_date = datetime.date(2011, 1, 3) + datetime.timedelta(days=7*no_week)  # tanggal pertama di week yang sedang dipilih
+    last_date = datetime.date(2011, 1, 3) + datetime.timedelta(days=7*no_week)  # tanggal terakhir di week yang sedang dipilih
 
     # Convert first_date dan last_date menjadi tipe datetime64
     first_date = np.datetime64(first_date)
@@ -146,52 +135,28 @@ def update_plot(attr, old, new):
     new_df = new_df[new_df["InvoiceDate"] >= first_date]
     new_df = new_df[new_df["InvoiceDate"] <= last_date]
 
-    if country != "Semua":  # jika memilih semua country
+    if country != "(Semua)":  # jika memilih semua country
         new_df = new_df[new_df["Country"] == country]  # filter dataframe agar hanya menyisakan data negara yang dipilih
         title = title + f' (Negara {country})'  # Menambah keterangan negara yang bersangkutan
     else:  # jika hanya memilih satu country
         title = title + " (Semua Negara)"  # Menambah keterangan negara
 
-    df_week = new_df.copy(deep=True)  # copy dataframe
+    # berisi list tanggal dari minggu yang dipilih, contohnya : ['10', '11', '12', '13', '14', '15', '16']
+    dates = [str(date) for date in range(
+        int(first_date.astype(object).day),
+        int(last_date.astype(object).day)
+    )
+    ]
 
-    dates = []  # akan diisi dengan tanggal-tanggal dari minggu yang dipilih
-    hours = []  # akan diisi dengan jam-jam terjadinya transaksi di minggu yang dipilih
-
-    # Cek apakah ada transaksi di negara yang dipilih di minggu yang dipilih
-    if len(df_week)!=0:
-
-        # Mengubah tipe data
-        df_week["date"] = df_week["date"].astype("str")
-        df_week["hour"] = df_week["hour"].astype("int")
-
-        # Mengambil tanggal dan jam transaksi pada minggu yang dipilih
-        dates = df_week.date.unique()
-        hours = df_week.hour.unique().tolist()
-        hours.sort()
-
-        # Melengkapi tanggal yang kosong
-        dates_in_int = []
-        for date in dates:
-            dates_in_int.append(int(date))
-        dates_in_int = range(min(dates_in_int), max(dates_in_int) + 1)
-        dates_in_int = [date for date in dates_in_int]
-        dates_in_int.sort()
-        while len(dates_in_int)!=7:
-            dates_in_int.append(max(dates_in_int)+1)
-        dates = []
-        for date in dates_in_int:
-            dates.append(str(date))
-
-        # Jika minggu pertama
-        if no_week == 1:
-            dates = ['3', '4', '5', '6', '7', '8', '9']
+    new_df["date"] = new_df["date"].astype("str")
+    new_df["hour"] = new_df["hour"].astype("int")
 
     # Membuat data untuk matriks_date_hour
     d = {}
     for date in dates:
         d[date] = []
         for hour in hours:
-            df_subset = df_week.copy(deep=True)
+            df_subset = new_df.copy(deep=True)
             df_subset = df_subset[(df_subset["date"] == date) & (df_subset["hour"] == hour)]
             d[date].append(len(df_subset.InvoiceNo.unique()))
 
@@ -246,12 +211,12 @@ def update_plot(attr, old, new):
     listOfSubLayouts.remove(plotToRemove)
     listOfSubLayouts.append(p_new)
 
-# Membuat slider week, ada 4 wee yang dapat dipilih
+# Membuat slider week, ada 4 week yang dapat dipilih
 slider_week = Slider(start=1, end=4, step=1, value=1, title="Minggu ke-")
 slider_week.on_change('value', update_plot)  # menambahkan on change listener. Jika nilai slider berubah, maka program menjalankan fungsi update_plot
 
 # Membuat select untuk memilih country
-countries = ["Semua"] + df["Country"].unique().tolist()
+countries = ["(Semua)"] + df["Country"].unique().tolist()
 select_country = Select(
     options=countries,
     value='Semua',
