@@ -219,7 +219,7 @@ slider_week.on_change('value', update_plot)  # menambahkan on change listener. J
 countries = ["(Semua)"] + df["Country"].unique().tolist()
 select_country = Select(
     options=countries,
-    value='Semua',
+    value='(Semua)',
     title='Negara'
 )
 select_country.on_change('value', update_plot)  # menambahkan on change listener. Jika nilai select berubah, maka program menjalankan fungsi update_plot
